@@ -1,0 +1,12 @@
+{
+    "name": "zac/car-wash",
+    "authors": [
+        {
+            "name": "lippatrick",
+            "email": "lubegap132@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
