@@ -1,0 +1,13 @@
+
+# Ignore local config (secrets, environment-specific)
+config/config.php
+
+# Ignore OS/editor noise
+.DS_Store
+Thumbs.db
+*.log
+
+# Ignore dependencies/build artifacts (optional)
+node_modules/
+vendor/
+.env

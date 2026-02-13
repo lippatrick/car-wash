@@ -1,0 +1,17 @@
+{
+    "name": "zac/car-wash",
+    "autoload": {
+        "psr-4": {
+            "Zac\\CarWash\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "lippatrick",
+            "email": "lubegap132@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

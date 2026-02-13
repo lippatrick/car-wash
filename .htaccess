@@ -1,0 +1,23 @@
+RewriteEngine On
+
+Options -MultiViews
+
+ErrorDocument 403 /403
+ErrorDocument 404 /404
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^$ index.php [L]
+
+RewriteRule ^home/?$ index.php [L]
+RewriteRule ^about/?$ about.php [L]
+RewriteRule ^services/?$ services.php [L]
+RewriteRule ^pricing/?$ pricing.php [L]
+RewriteRule ^contact/?$ contact.php [L]
+
+RewriteRule ^403/?$ 403.php [L]
+RewriteRule ^404/?$ 404.php [L]

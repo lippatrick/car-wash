@@ -1,9 +1,14 @@
 <?php
+// master.php - Public Site (CSS based, static, no backend)
+
 if (!isset($pageTitle)) {
-    $pageTitle = 'Car Wash Uganda';
+    $pageTitle = 'Car Wash';
 }
 if (!isset($activePage)) {
-    $activePage = '';
+    $activePage = 'home';
+} // home | about | services | pricing | contact
+if (!isset($metaDesc)) {
+    $metaDesc = 'Professional car wash services.';
 }
 if (!isset($mainContent)) {
     $mainContent = '';
@@ -14,287 +19,637 @@ function e($v)
     return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 }
 
-function base_url()
-{
-    if (defined('BASE_URL') && BASE_URL) {
-        return rtrim(BASE_URL, '/').'/';
-    }
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $script = $_SERVER['SCRIPT_NAME'] ?? '/';
-    $dir = rtrim(str_replace('\\', '/', dirname($script)), '/');
-
-    return $scheme.'://'.$host.($dir ? $dir.'/' : '/');
-}
-
-function asset_url($path)
-{
-    return base_url().ltrim($path, '/');
-}
-
-function nav_link($href, $label, $key, $activePage)
-{
-    $isActive = ($key === $activePage);
-    $cls = $isActive
-        ? 'text-black bg-secondary/70 border-secondary'
-        : 'text-muted hover:text-black hover:bg-secondary/50 border-transparent';
-
-    return '<a href="'.e($href).'" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border '.$cls.' transition">'
-        .e($label).'</a>';
-}
-
-$brandName = 'Kampala Car Wash';
-$brandTagline = 'Order a wash. We come to you.';
-
-$siteLinks = [
-    ['href' => asset_url('index.php'), 'label' => 'Home', 'key' => 'home'],
-    ['href' => asset_url('services.php'), 'label' => 'Services', 'key' => 'services'],
-    ['href' => asset_url('pricing.php'), 'label' => 'Pricing', 'key' => 'pricing'],
-    ['href' => asset_url('order.php'), 'label' => 'Place Order', 'key' => 'order'],
-    ['href' => asset_url('about.php'), 'label' => 'About', 'key' => 'about'],
-    ['href' => asset_url('contact.php'), 'label' => 'Contact', 'key' => 'contact'],
+$nav = [
+    ['key' => 'home',     'label' => 'Home',      'href' => 'index.php'],
+    ['key' => 'about',    'label' => 'About Us',  'href' => 'about'],
+    ['key' => 'services', 'label' => 'Services',  'href' => 'services'],
+    ['key' => 'pricing',  'label' => 'Pricing',   'href' => 'pricing'],
+    ['key' => 'contact',  'label' => 'Contact',   'href' => 'contact'],
 ];
-
-$whatsappNumber = '+256700000000';
-$whatsappLink = 'https://wa.me/'.preg_replace('/\D+/', '', $whatsappNumber).'?text='.rawurlencode('Hello, I would like to place a car wash order.');
-
-$metaDesc = 'Online car wash in Uganda. Book a wash, choose services, set location and time - our team comes to you.';
-$metaImage = asset_url('assets/og-image.jpg');
-?>
-<!doctype html>
+?><!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><?php echo e($pageTitle); ?> - <?php echo e($brandName); ?></title>
-    <meta name="description" content="<?php echo e($metaDesc); ?>" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="<?php echo e($metaDesc); ?>" />
+  <title><?php echo e($pageTitle); ?></title>
 
-    <meta property="og:title" content="<?php echo e($pageTitle); ?> - <?php echo e($brandName); ?>" />
-    <meta property="og:description" content="<?php echo e($metaDesc); ?>" />
-    <meta property="og:image" content="<?php echo e($metaImage); ?>" />
-    <meta property="og:type" content="website" />
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-    <link rel="icon" href="<?php echo e(asset_url('assets/favicon.png')); ?>" />
+  <style>
+    :root{
+      --bg: #070b14;
+      --bg2:#0b1220;
+      --surface: rgba(255,255,255,.06);
+      --surface2: rgba(255,255,255,.10);
+      --text: #eaf0ff;
+      --muted: rgba(234,240,255,.72);
+      --border: rgba(234,240,255,.14);
+      --primary: #22c55e;
+      --primary2:#38bdf8;
+      --danger: #ef4444;
+      --shadow: 0 18px 55px rgba(0,0,0,.38);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 12px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#0B1220",
-                        secondary: "#ECE6E2",
-                        accent: "#D7AD99",
-                        accentDark: "#b66c40",
-                        surface: "#ffffff",
-                        muted: "#544c50",
-                        brand: {
-                            primary: "#0B1220",
-                            accent: "#D7AD99",
-                        }
-                    },
-                    boxShadow: {
-                        soft: "0 10px 30px rgba(0,0,0,0.08)"
-                    }
-                }
-            }
-        }
-    </script>
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% 10%, rgba(56,189,248,.22), transparent 60%),
+        radial-gradient(900px 520px at 90% 20%, rgba(34,197,94,.22), transparent 60%),
+        radial-gradient(700px 500px at 50% 100%, rgba(99,102,241,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      min-height: 100vh;
+    }
 
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    [x-cloak]{ display:none !important; }
 
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
+    a{ color: inherit; }
+    .container{
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(7,11,20,.60);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(234,240,255,.08);
+    }
+    .topbar-inner{
+      height: 74px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 16px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      text-decoration:none;
+      min-width: 0;
+    }
+    .logo{
+      height: 44px;
+      width: 44px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: var(--shadow);
+      flex-shrink:0;
+    }
+    .logo svg{ color:#07101f; }
+    .brand-meta{ min-width:0; }
+    .brand-title{
+      font-weight: 900;
+      letter-spacing: .2px;
+      font-size: 16px;
+      line-height: 1.05;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .brand-sub{
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav{
+      display:none;
+      align-items:center;
+      gap: 10px;
+    }
+    @media (min-width: 860px){
+      .nav{ display:flex; }
+    }
+
+    .nav a{
+      text-decoration:none;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      color: rgba(234,240,255,.86);
+      font-weight: 750;
+      font-size: 13px;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .nav a:hover{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(234,240,255,.14);
+    }
+    .nav a.active{
+      background: rgba(34,197,94,.16);
+      border-color: rgba(34,197,94,.28);
+      color: #dfffea;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+
+    .btn{
+      height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(234,240,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-weight: 850;
+      font-size: 13px;
+      cursor: pointer;
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+      text-decoration:none;
+      white-space: nowrap;
+    }
+    .btn:hover{
+      background: rgba(255,255,255,.10);
+      border-color: rgba(234,240,255,.20);
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(34,197,94,.92), rgba(56,189,248,.92));
+      border-color: rgba(255,255,255,.18);
+      color: #06101f;
+    }
+    .btn.primary:hover{ filter: brightness(1.03); }
+
+    .icon-btn{
+      height: 42px;
+      width: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(234,240,255,.14);
+      background: rgba(255,255,255,.06);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .icon-btn:hover{
+      background: rgba(255,255,255,.10);
+      border-color: rgba(234,240,255,.20);
+    }
+
+    .mobile-menu-btn{
+      display:inline-flex;
+    }
+    @media (min-width: 860px){
+      .mobile-menu-btn{ display:none; }
+    }
+
+    .mobile-sheet{
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display:flex;
+      justify-content:flex-end;
+    }
+    .overlay{
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.55);
+    }
+    .sheet{
+      position: relative;
+      width: min(360px, 92vw);
+      height: 100%;
+      background: rgba(7,11,20,.92);
+      backdrop-filter: blur(12px);
+      border-left: 1px solid rgba(234,240,255,.12);
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .sheet-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 8px 6px 12px 6px;
+      border-bottom: 1px solid rgba(234,240,255,.10);
+    }
+    .sheet-title{
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .sheet-nav{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      padding: 10px 4px;
+    }
+    .sheet-nav a{
+      text-decoration:none;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(234,240,255,.10);
+      background: rgba(255,255,255,.04);
+      font-weight: 850;
+      color: rgba(234,240,255,.92);
+    }
+    .sheet-nav a.active{
+      background: rgba(34,197,94,.14);
+      border-color: rgba(34,197,94,.26);
+      color: #dfffea;
+    }
+
+    .hero{
+      padding: 44px 0 10px 0;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    @media (max-width: 980px){
+      .hero-grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(234,240,255,.12);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+    .hero-left{
+      padding: 26px;
+      overflow:hidden;
+      position:relative;
+    }
+    .hero-badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(234,240,255,.14);
+      background: rgba(255,255,255,.05);
+      color: rgba(234,240,255,.90);
+      font-weight: 850;
+      font-size: 12px;
+    }
+    .hero-title{
+      margin: 14px 0 0 0;
+      font-size: clamp(28px, 4.2vw, 46px);
+      line-height: 1.06;
+      letter-spacing: -.4px;
+      font-weight: 950;
+    }
+    .hero-title span{
+      background: linear-gradient(135deg, rgba(34,197,94,1), rgba(56,189,248,1));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-desc{
+      margin: 14px 0 0 0;
+      color: rgba(234,240,255,.76);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 54ch;
+    }
+    .hero-actions{
+      margin-top: 18px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items:center;
+    }
+
+    .hero-right{
+      padding: 16px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .stat{
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(234,240,255,.12);
+      background: rgba(255,255,255,.05);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .stat .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .stat-ic{
+      height: 44px;
+      width: 44px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(234,240,255,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .stat-ic svg{ color: rgba(234,240,255,.86); }
+    .stat-title{ font-weight: 950; font-size: 14px; }
+    .stat-sub{ margin-top: 3px; color: rgba(234,240,255,.72); font-size: 12px; }
+
+    .section{
+      padding: 22px 0;
+    }
+    .section-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .section-title{
+      margin:0;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -.2px;
+    }
+    .section-desc{
+      margin: 0;
+      color: rgba(234,240,255,.70);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .grid{
+      display:grid;
+      gap: 14px;
+    }
+    .grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+    .grid.cols-2{ grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 980px){
+      .grid.cols-3{ grid-template-columns: 1fr; }
+      .grid.cols-2{ grid-template-columns: 1fr; }
+    }
+
+    .feature{
+      padding: 16px;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(234,240,255,.12);
+      background: rgba(255,255,255,.05);
+    }
+    .feature-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .feature-ic{
+      height: 46px;
+      width: 46px;
+      border-radius: 18px;
+      background: rgba(34,197,94,.10);
+      border: 1px solid rgba(34,197,94,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .feature-ic.alt{
+      background: rgba(56,189,248,.10);
+      border-color: rgba(56,189,248,.18);
+    }
+    .feature-ic svg{ color: rgba(234,240,255,.92); }
+    .feature h3{
+      margin: 10px 0 0 0;
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: -.15px;
+    }
+    .feature p{
+      margin: 8px 0 0 0;
+      color: rgba(234,240,255,.72);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .footer{
+      padding: 26px 0 40px 0;
+      border-top: 1px solid rgba(234,240,255,.10);
+      margin-top: 18px;
+    }
+    .footer-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .footer-grid{ grid-template-columns: 1fr; }
+    }
+    .foot-title{ font-weight: 950; margin: 0; }
+    .foot-desc{ margin: 10px 0 0 0; color: rgba(234,240,255,.72); font-size: 13px; line-height: 1.55; }
+    .foot-links{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content:flex-end;
+    }
+    @media (max-width: 980px){
+      .foot-links{ justify-content:flex-start; }
+    }
+    .foot-links a{
+      text-decoration:none;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(234,240,255,.12);
+      background: rgba(255,255,255,.04);
+      font-weight: 850;
+      font-size: 12px;
+      color: rgba(234,240,255,.86);
+    }
+    .foot-links a:hover{
+      background: rgba(255,255,255,.08);
+      border-color: rgba(234,240,255,.18);
+    }
+    .tiny{
+      margin-top: 14px;
+      color: rgba(234,240,255,.55);
+      font-size: 12px;
+    }
+
+    .form{
+      display:grid;
+      gap: 12px;
+      padding: 18px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    label{
+      font-weight: 850;
+      font-size: 12px;
+      color: rgba(234,240,255,.86);
+    }
+    input, textarea, select{
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(234,240,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 12px 12px;
+      outline: none;
+      font-size: 13px;
+    }
+    textarea{ min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus, select:focus{
+      border-color: rgba(34,197,94,.34);
+      box-shadow: 0 0 0 3px rgba(34,197,94,.18);
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    @media (max-width: 980px){
+      .split{ grid-template-columns: 1fr; }
+    }
+    .info-card{
+      padding: 18px;
+    }
+    .info-row{
+      display:flex;
+      align-items:flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(234,240,255,.10);
+    }
+    .info-row:last-child{ border-bottom: 0; }
+    .info-ic{
+      height: 42px;
+      width: 42px;
+      border-radius: 18px;
+      border: 1px solid rgba(234,240,255,.12);
+      background: rgba(255,255,255,.05);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .info-ic svg{ color: rgba(234,240,255,.86); }
+    .info-title{
+      font-weight: 950;
+      font-size: 13px;
+    }
+    .info-sub{
+      margin-top: 6px;
+      color: rgba(234,240,255,.72);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-secondary/35 text-primary antialiased">
-<div
-    x-data="siteShell()"
-    x-init="init()"
-    class="min-h-screen flex flex-col"
->
-    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-secondary/70">
-        <div class="max-w-6xl mx-auto px-4 lg:px-6">
-            <div class="h-16 flex items-center justify-between gap-3">
-                <a href="<?php echo e(asset_url('index.php')); ?>" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-primary text-white grid place-items-center shadow-soft">
-                        <span class="text-sm font-semibold">CW</span>
-                    </div>
-                    <div class="leading-tight">
-                        <div class="font-semibold"><?php echo e($brandName); ?></div>
-                        <div class="text-xs text-muted"><?php echo e($brandTagline); ?></div>
-                    </div>
-                </a>
-
-                <nav class="hidden lg:flex items-center gap-2">
-                    <?php foreach ($siteLinks as $l) {
-                        echo nav_link($l['href'], $l['label'], $l['key'], $activePage);
-                    } ?>
-                </nav>
-
-                <div class="flex items-center gap-2">
-                    <a href="<?php echo e($whatsappLink); ?>" target="_blank" rel="noopener"
-                       class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-accent text-primary font-medium shadow-soft hover:bg-accent/90 transition">
-                        WhatsApp
-                    </a>
-
-                    <a href="<?php echo e(asset_url('order.php')); ?>"
-                       class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-primary text-white font-medium shadow-soft hover:opacity-95 transition">
-                        Place Order
-                    </a>
-
-                    <button
-                        type="button"
-                        class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border border-secondary/70 bg-white hover:bg-secondary/40 transition"
-                        @click="openMobileNav()"
-                        aria-label="Open menu"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
+<body>
+  <header class="topbar" x-data="{ open:false }">
+    <div class="container topbar-inner">
+      <a class="brand" href="index">
+        <div class="logo"><i data-lucide="droplets" style="width:22px;height:22px;"></i></div>
+        <div class="brand-meta">
+          <div class="brand-title">Car Wash</div>
+          <div class="brand-sub">Clean. Fast. Reliable.</div>
         </div>
+      </a>
 
-        <div
-            x-show="mobileOpen"
-            x-cloak
-            class="lg:hidden"
-        >
-            <div class="fixed inset-0 z-50">
-                <div class="absolute inset-0 bg-black/40" @click="closeMobileNav()"></div>
+      <nav class="nav">
+        <?php foreach ($nav as $item) {
+            $isActive = ($activePage === $item['key']); ?>
+          <a class="<?php echo $isActive ? 'active' : ''; ?>" href="<?php echo e($item['href']); ?>"><?php echo e($item['label']); ?></a>
+        <?php } ?>
+      </nav>
 
-                <div class="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white shadow-xl border-l border-secondary/70">
-                    <div class="h-16 px-4 flex items-center justify-between border-b border-secondary/70">
-                        <div class="font-semibold">Menu</div>
-                        <button
-                            type="button"
-                            class="w-10 h-10 rounded-xl border border-secondary/70 hover:bg-secondary/40 transition grid place-items-center"
-                            @click="closeMobileNav()"
-                            aria-label="Close menu"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 6 6 18M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="p-4 space-y-2">
-                        <?php foreach ($siteLinks as $l) {
-                            echo nav_link($l['href'], $l['label'], $l['key'], $activePage);
-                        } ?>
-
-                        <div class="pt-3 border-t border-secondary/70 space-y-2">
-                            <a href="<?php echo e($whatsappLink); ?>" target="_blank" rel="noopener"
-                               class="w-full inline-flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-accent text-primary font-medium shadow-soft hover:bg-accent/90 transition">
-                                WhatsApp
-                            </a>
-
-                            <a href="<?php echo e(asset_url('order.php')); ?>"
-                               class="w-full inline-flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-primary text-white font-medium shadow-soft hover:opacity-95 transition">
-                                Place Order
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1">
-        <div class="max-w-6xl mx-auto px-4 lg:px-6 py-8">
-            <?php echo $mainContent; ?>
-        </div>
-    </main>
-
-    <footer class="border-t border-secondary/70 bg-white">
-        <div class="max-w-6xl mx-auto px-4 lg:px-6 py-10">
-            <div class="grid md:grid-cols-4 gap-8">
-                <div class="md:col-span-2">
-                    <div class="font-semibold text-lg"><?php echo e($brandName); ?></div>
-                    <div class="text-sm text-muted mt-1 max-w-md">
-                        Book a wash online anywhere in Uganda. Choose your service, location, and time. Our team comes to you.
-                    </div>
-
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <a href="<?php echo e($whatsappLink); ?>" target="_blank" rel="noopener"
-                           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-secondary text-primary hover:bg-secondary transition">
-                            Chat on WhatsApp
-                        </a>
-                        <a href="<?php echo e(asset_url('order.php')); ?>"
-                           class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-primary text-white hover:opacity-95 transition">
-                            Place Order
-                        </a>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="font-semibold">Quick Links</div>
-                    <div class="mt-3 flex flex-col gap-2 text-sm">
-                        <?php foreach ($siteLinks as $l) { ?>
-                            <a class="text-muted hover:text-primary transition" href="<?php echo e($l['href']); ?>"><?php echo e($l['label']); ?></a>
-                        <?php } ?>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="font-semibold">Contact</div>
-                    <div class="mt-3 text-sm text-muted space-y-2">
-                        <div>WhatsApp: <?php echo e($whatsappNumber); ?></div>
-                        <div>Email: info@example.com</div>
-                        <div>Hours: 8:00am - 8:00pm</div>
-                        <div class="pt-2">
-                            <span class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-secondary">
-                                Kampala - Uganda
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-10 pt-6 border-t border-secondary/70 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm text-muted">
-                <div>© <?php echo (int) date('Y'); ?> <?php echo e($brandName); ?>. All rights reserved.</div>
-                <div class="flex gap-4">
-                    <a href="<?php echo e(asset_url('privacy.php')); ?>" class="hover:text-primary transition">Privacy</a>
-                    <a href="<?php echo e(asset_url('terms.php')); ?>" class="hover:text-primary transition">Terms</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <div class="fixed bottom-5 right-5 z-40">
-        <a href="<?php echo e($whatsappLink); ?>" target="_blank" rel="noopener"
-           class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent text-primary shadow-soft hover:bg-accent/90 transition"
-           aria-label="WhatsApp">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.52 3.48A11.91 11.91 0 0 0 12.06 0C5.5 0 .16 5.33.16 11.9c0 2.1.55 4.15 1.6 5.97L0 24l6.3-1.65a11.88 11.88 0 0 0 5.76 1.47h.01c6.57 0 11.9-5.33 11.9-11.9 0-3.18-1.24-6.17-3.45-8.44ZM12.07 21.7h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.65-.23-.38a9.88 9.88 0 1 1 8.38 4.64Zm5.73-7.37c-.31-.16-1.84-.9-2.13-1-.29-.11-.5-.16-.72.16-.22.31-.83 1-.99 1.2-.18.2-.36.23-.67.08-.31-.16-1.3-.48-2.47-1.52-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.48.13-.63.13-.13.31-.36.47-.54.16-.18.2-.31.31-.52.11-.2.05-.39-.03-.55-.08-.16-.72-1.73-.99-2.37-.26-.62-.52-.53-.72-.54h-.62c-.2 0-.55.08-.83.39-.28.31-1.1 1.07-1.1 2.61 0 1.54 1.13 3.02 1.29 3.23.16.2 2.22 3.38 5.37 4.74.75.32 1.33.51 1.78.65.75.24 1.43.2 1.97.12.6-.09 1.84-.75 2.1-1.47.26-.72.26-1.34.18-1.47-.08-.13-.29-.2-.6-.36Z"/>
-            </svg>
+      <div class="actions">
+        <a class="btn primary" href="pricing.php">
+          <i data-lucide="badge-dollar-sign" style="width:18px;height:18px;"></i>
+          View Pricing
         </a>
+        <button class="icon-btn mobile-menu-btn" type="button" @click="open=true" aria-label="Open menu">
+          <i data-lucide="menu" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
     </div>
-</div>
 
-<script>
-function siteShell() {
-    return {
-        mobileOpen: false,
-        init() {
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && this.mobileOpen) this.closeMobileNav()
-            })
-        },
-        openMobileNav() {
-            this.mobileOpen = true
-            document.documentElement.classList.add('overflow-hidden')
-        },
-        closeMobileNav() {
-            this.mobileOpen = false
-            document.documentElement.classList.remove('overflow-hidden')
-        },
-    }
-}
-</script>
+    <div x-cloak x-show="open" class="mobile-sheet">
+      <div class="overlay" @click="open=false"></div>
+      <div class="sheet">
+        <div class="sheet-head">
+          <div class="sheet-title">Menu</div>
+          <button class="icon-btn" type="button" @click="open=false" aria-label="Close menu">
+            <i data-lucide="x" style="width:18px;height:18px;"></i>
+          </button>
+        </div>
 
+        <div class="sheet-nav">
+          <?php foreach ($nav as $item) {
+              $isActive = ($activePage === $item['key']); ?>
+            <a class="<?php echo $isActive ? 'active' : ''; ?>" href="<?php echo e($item['href']); ?>"><?php echo e($item['label']); ?></a>
+          <?php } ?>
+          <a href="pricing.php" style="background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.26);color:#dfffea;">View Pricing</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <?php echo $mainContent; ?>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <p class="foot-title">Car Wash</p>
+        <p class="foot-desc">
+          Professional exterior and interior cleaning with premium products.
+          Quick turnaround, consistent quality, and friendly service.
+        </p>
+        <div class="tiny">Static demo UI. No backend or submissions yet.</div>
+      </div>
+      <div class="foot-links">
+        <a href="about">About</a>
+        <a href="services">Services</a>
+        <a href="pricing">Pricing</a>
+        <a href="contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+  </script>
 </body>
 </html>
