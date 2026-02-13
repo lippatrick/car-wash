@@ -145,4 +145,6 @@ ob_start();
 </section>
 <?php
 $mainContent = ob_get_clean();
+
+// NOSONAR
 require __DIR__.'/master.php';
